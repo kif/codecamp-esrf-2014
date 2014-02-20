@@ -26,12 +26,31 @@ __kernel void clkernel(__global float2* clpos, __global float2* glpos)
 def clinit():
     """Initialize OpenCL with GL-CL interop.
     """
-    plats = cl.get_platforms()
-    ctx = cl.Context(properties=[
-            (cl.context_properties.PLATFORM, plats[0])]
-            + get_gl_sharing_context_properties(), devices = 
-                                      [plats[0].get_devices()[DEVICE]])
+    if sys.platform == "darwin":
+        print(dir(cl.context_properties))
+        ctx = cl.Context(properties=get_gl_sharing_context_properties(),
+                                devices=[])
+    else:
+        # Some OSs prefer clCreateContextFromType, some prefer
+        # clCreateContext. Try both.
+        try:
+            ctx = cl.Context(properties=[
+                            (cl.context_properties.PLATFORM, platform)]
+                            + get_gl_sharing_context_properties())
+        except:
+           ctx = cl.Context(properties=[
+                            (cl.context_properties.PLATFORM, platform)]
+                           + get_gl_sharing_context_properties(),
+                            devices = [platform.get_devices()[0]])
+
+   # plats = cl.get_platforms()
+   # ctx = cl.Context(properties=[
+   #         (cl.context_properties.PLATFORM, plats[0])]
+   #         + get_gl_sharing_context_properties(), devices = None) 
+   #                                   #[plats[0].get_devices()[DEVICE]])
+    print(ctx)
     queue = cl.CommandQueue(ctx)
+
     return ctx, queue
  
 class GLPlotWidget(QGLWidget):
