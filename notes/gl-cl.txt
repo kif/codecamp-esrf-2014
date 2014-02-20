@@ -1,0 +1,8 @@
+Important before you start:
+
+Check you PyOpenCL is compiled for OpenGL interaction:
+
+import pyopencl
+print(pyopencl.have_gl())
+
+
